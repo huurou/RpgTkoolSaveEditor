@@ -1,0 +1,139 @@
+﻿<Window x:Class="RpgTkoolSaveEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RpgTkoolSaveEditor"
+        xmlns:behaviors="clr-namespace:RpgTkoolSaveEditor.Behaviors"
+        xmlns:controls="clr-namespace:RpgTkoolSaveEditor.Controls"
+        d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
+        mc:Ignorable="d"
+        Title="{Binding Title}" Width="1920" Height="1080">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Window.Resources>
+        <Style TargetType="DataGrid">
+            <Setter Property="HeadersVisibility" Value="Column" />
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="BorderBrush" Value="DarkGray" />
+            <Setter Property="HorizontalGridLinesBrush" Value="DarkGray" />
+            <Setter Property="VerticalGridLinesBrush" Value="DarkGray" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+            <Setter Property="Background" Value="White" />
+        </Style>
+    </Window.Resources>
+    <Border Margin="8">
+        <controls:SpacingGrid RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <controls:SpacingStackPanel Grid.Row="0" Spacing="4" Orientation="Horizontal">
+                <TextBlock>Gold</TextBlock>
+                <TextBox Text="{Binding Gold.Value, UpdateSourceTrigger=PropertyChanged}" />
+            </controls:SpacingStackPanel>
+            <controls:SpacingGrid Grid.Row="1" ColumnSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <GroupBox Grid.Column="0" Header="Switches">
+                    <DataGrid ItemsSource="{Binding Switches}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True" />
+                            <DataGridCheckBoxColumn Header="Value" Binding="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+                <GroupBox Grid.Column="1" Header="Variables">
+                    <DataGrid ItemsSource="{Binding Variables}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Value" Binding="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+                <GroupBox Grid.Column="2" Header="Items">
+                    <DataGrid ItemsSource="{Binding Items}">
+                        <i:Interaction.Behaviors>
+                            <behaviors:DataGridSelectedItemsBehavior SelectedItems="{Binding SelectedItems}" />
+                        </i:Interaction.Behaviors>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="ToolTip" Value="{Binding Description}" />
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Count" Binding="{Binding Count, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataGrid.Columns>
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="選択行を99個にする" Command="{Binding Set99ItemsCommand}" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+                </GroupBox>
+                <GroupBox Grid.Column="3" Header="Weapons">
+                    <DataGrid ItemsSource="{Binding Weapons}">
+                        <i:Interaction.Behaviors>
+                            <behaviors:DataGridSelectedItemsBehavior SelectedItems="{Binding SelectedWeapons}" />
+                        </i:Interaction.Behaviors>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="ToolTip" Value="{Binding Description}" />
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Count" Binding="{Binding Count, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataGrid.Columns>
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="選択行を1個にする" Command="{Binding Set1WeaponsCommand}" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+                </GroupBox>
+                <GroupBox Grid.Column="4" Header="Armors">
+                    <DataGrid ItemsSource="{Binding Armors}">
+                        <i:Interaction.Behaviors>
+                            <behaviors:DataGridSelectedItemsBehavior SelectedItems="{Binding SelectedArmors}" />
+                        </i:Interaction.Behaviors>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" IsReadOnly="True">
+                                <DataGridTextColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="ToolTip" Value="{Binding Description}" />
+                                    </Style>
+                                </DataGridTextColumn.CellStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Count" Binding="{Binding Count, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataGrid.Columns>
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="選択行を1個にする" Command="{Binding Set1ArmorsCommand}" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+                </GroupBox>
+            </controls:SpacingGrid>
+        </controls:SpacingGrid>
+    </Border>
+</Window>
