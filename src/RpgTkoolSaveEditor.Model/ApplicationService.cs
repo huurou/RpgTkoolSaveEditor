@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using RpgTkoolSaveEditor.Model.SaveDatas;
 
 namespace RpgTkoolSaveEditor.Model;
@@ -6,13 +7,15 @@ namespace RpgTkoolSaveEditor.Model;
 public class ApplicationService(
     SaveFileWatcher saveFileWatcher,
     [FromKeyedServices("rpgsave")] ISaveDataRepository rpgSaveDataRepository,
-    [FromKeyedServices("rmmzsave")] ISaveDataRepository rmmzSaveDataRepository
+    [FromKeyedServices("rmmzsave")] ISaveDataRepository rmmzSaveDataRepository,
+    ILogger<ApplicationService> logger
 )
 {
     public event EventHandler<SaveDataLoadedEventArgs>? SaveDataLoaded;
 
     private SaveFileType saveFileType_;
     private string? saveDirPath_;
+    private CancellationTokenSource? cancellationTokenSource_;
 
     public void Initialize(string saveDirPath)
     {
@@ -32,6 +35,8 @@ public class ApplicationService(
     {
         if (string.IsNullOrEmpty(saveDirPath_)) { return; }
 
+        logger.LogInformation("セーブデータのセーブが要求されました。");
+
         var saveDataRepository = saveFileType_ switch
         {
             SaveFileType.None => null,
@@ -39,9 +44,19 @@ public class ApplicationService(
             SaveFileType.RmmzSave => rmmzSaveDataRepository,
             _ => throw new NotSupportedException($"Unsupported save file type: {saveFileType_}")
         };
-        if (saveDataRepository is not null)
+        if (saveDataRepository is null) { return; }
+
+        cancellationTokenSource_?.Cancel();
+        cancellationTokenSource_ = new();
+        try
         {
+            await Task.Delay(500, cancellationTokenSource_.Token);
             await saveDataRepository.SaveAsync(saveData, saveDirPath_);
+            saveFileWatcher.LoadSuppressed = true;
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogInformation("セーブデータのセーブがキャンセルされました。");
         }
     }
 }
