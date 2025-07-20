@@ -82,20 +82,20 @@ public partial class MainWindowViewModel(ApplicationService applicationService) 
     }
 
     [RelayCommand]
-    public void Set1Weapons()
+    public void Set99Weapons()
     {
         foreach (var weapon in SelectedWeapons)
         {
-            weapon.Count = 1;
+            weapon.Count = 99;
         }
     }
 
     [RelayCommand]
-    public void Set1Armors()
+    public void Set99Armors()
     {
         foreach (var armor in SelectedArmors)
         {
-            armor.Count = 1;
+            armor.Count = 99;
         }
     }
 

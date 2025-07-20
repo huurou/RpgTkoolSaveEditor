@@ -105,7 +105,7 @@
                         </DataGrid.Columns>
                         <DataGrid.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="選択行を1個にする" Command="{Binding Set1WeaponsCommand}" />
+                                <MenuItem Header="選択行を1個にする" Command="{Binding Set99WeaponsCommand}" />
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                     </DataGrid>
@@ -128,7 +128,7 @@
                         </DataGrid.Columns>
                         <DataGrid.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="選択行を1個にする" Command="{Binding Set1ArmorsCommand}" />
+                                <MenuItem Header="選択行を1個にする" Command="{Binding Set99ArmorsCommand}" />
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                     </DataGrid>
