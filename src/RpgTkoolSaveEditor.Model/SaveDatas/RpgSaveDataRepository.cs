@@ -126,7 +126,7 @@ public class RpgSaveDataRepository(ILogger<RpgSaveDataRepository> logger) : ISav
             {
                 variableValuesJsonArray.Add(null);
             }
-            variableValuesJsonArray[variable.Id] = JsonValue.Create(variable.Value);
+            variableValuesJsonArray[variable.Id] = JsonSerializer.SerializeToNode(variable.Value);
         }
         goldJsonValue.ReplaceWith(saveData.Gold);
         foreach (var item in saveData.Items)
