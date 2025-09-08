@@ -1,4 +1,4 @@
-[![.NET テスト実行](https://github.com/huurou/RpgTkoolSaveEditor/actions/workflows/dotnet-test.yml/badge.svg)](https://github.com/huurou/RpgTkoolSaveEditor/actions/workflows/dotnet-test.yml)
+[![.NET テスト](https://github.com/huurou/RpgTkoolSaveEditor/actions/workflows/dotnet-test.yml/badge.svg)](https://github.com/huurou/RpgTkoolSaveEditor/actions/workflows/dotnet-test.yml)
 
 # RpgTkoolSaveEditor v1.1.0
 
