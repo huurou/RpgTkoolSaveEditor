@@ -1,0 +1,32 @@
+name: .NET テスト実行
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build-and-test:
+    name: ビルドとテスト
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ./src
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: .NET SDK セットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: 依存関係の復元
+        run: dotnet restore
+
+      - name: ビルド
+        run: dotnet build --configuration Release --no-restore
+
+      - name: テスト実行
+        run: dotnet test --configuration Release --no-restore --no-build --verbosity normal
