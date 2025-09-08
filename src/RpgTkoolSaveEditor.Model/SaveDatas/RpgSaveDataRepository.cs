@@ -143,9 +143,9 @@ public class RpgSaveDataRepository(ILogger<RpgSaveDataRepository> logger) : ISav
         }
         using var jsonMemoryStreamSave = new MemoryStream();
         await JsonSerializer.SerializeAsync(jsonMemoryStreamSave, rootObject);
-        jsonMemoryStream.Position = 0;
-        using var jsonMemoryStreamReader = new StreamReader(jsonMemoryStream);
-        json = await jsonMemoryStreamReader.ReadToEndAsync();
+        jsonMemoryStreamSave.Position = 0;
+        using var jsonMemoryStreamSaveReader = new StreamReader(jsonMemoryStreamSave);
+        json = await jsonMemoryStreamSaveReader.ReadToEndAsync();
         await File.WriteAllTextAsync(saveFilePath, LZString.CompressToBase64(json));
 
         logger.LogInformation("セーブデータがセーブされました。");

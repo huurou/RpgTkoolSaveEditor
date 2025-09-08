@@ -30,10 +30,10 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
         var compressedData = Encoding.GetEncoding("ISO-8859-1").GetBytes(textData);
         using var compressedStream = new MemoryStream(compressedData);
         using var zlibStream = new ZLibStream(compressedStream, CompressionMode.Decompress);
-        using var jsonMemoryStream = new MemoryStream();
-        await zlibStream.CopyToAsync(jsonMemoryStream);
-        jsonMemoryStream.Seek(0, SeekOrigin.Begin);
-        if (await JsonNode.ParseAsync(jsonMemoryStream) is not JsonObject rootObject) { throw new InvalidOperationException($"{saveFilePath}のJSON変換に失敗しました。"); }
+        using var jsonMemoryStreamSave = new MemoryStream();
+        await zlibStream.CopyToAsync(jsonMemoryStreamSave);
+        jsonMemoryStreamSave.Seek(0, SeekOrigin.Begin);
+        if (await JsonNode.ParseAsync(jsonMemoryStreamSave) is not JsonObject rootObject) { throw new InvalidOperationException($"{saveFilePath}のJSON変換に失敗しました。"); }
         if (rootObject["switches"]?["_data"] is not JsonArray switchValuesJsonArray) { throw new InvalidOperationException("swiches._dataに配列が見つかりませんでした。"); }
         if (rootObject["variables"]?["_data"] is not JsonArray variableValuesJsonArray) { throw new InvalidOperationException("variables._dataに配列が見つかりませんでした。"); }
         if (rootObject["party"]?["_gold"] is not JsonValue goldJsonValue) { throw new InvalidOperationException("party._goldに値が見つかりませんでした。"); }
@@ -160,11 +160,11 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
             heldArmorsJsonObject[armor.Id.ToString()] = armor.Count;
         }
 
-        using var jsonMemoryStream = new MemoryStream();
-        await JsonSerializer.SerializeAsync(jsonMemoryStream, rootObject);
-        jsonMemoryStream.Position = 0;
-        using var jsonMemoryStreamReader = new StreamReader(jsonMemoryStream);
-        var jsonString = await jsonMemoryStreamReader.ReadToEndAsync();
+        using var jsonMemoryStreamSave = new MemoryStream();
+        await JsonSerializer.SerializeAsync(jsonMemoryStreamSave, rootObject);
+        jsonMemoryStreamSave.Position = 0;
+        using var jsonMemoryStreamSaveReader = new StreamReader(jsonMemoryStreamSave);
+        var jsonString = await jsonMemoryStreamSaveReader.ReadToEndAsync();
         using (var originalStream = new MemoryStream(NonBomEncoding.UTF8.GetBytes(jsonString)))
         using (var compressedStreamSave = new MemoryStream())
         {
