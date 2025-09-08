@@ -28,9 +28,9 @@ public class SaveFileWatcher(
             File.Exists(Path.Combine(saveDirPath, RPGSAVE_FILE_NAME)) ? SaveFileType.RpgSave
             : File.Exists(Path.Combine(saveDirPath, RMMZSAVE_FILE_NAME)) ? SaveFileType.RmmzSave
             : throw new InvalidOperationException($"'{RPGSAVE_FILE_NAME}' または '{RMMZSAVE_FILE_NAME}' が '{saveDirPath}' に見つかりませんでした。");
-        
+
         DisposeWatcher();
-        
+
         saveDataWather_ = saveFileType switch
         {
             SaveFileType.RpgSave => new(saveDirPath, RPGSAVE_FILE_NAME),
@@ -96,10 +96,7 @@ public class SaveFileWatcher(
 
     private void ThrowIfDisposed()
     {
-        if (disposed_)
-        {
-            throw new ObjectDisposedException(nameof(SaveFileWatcher));
-        }
+        ObjectDisposedException.ThrowIf(disposed_, nameof(SaveFileWatcher));
     }
 
     protected virtual void Dispose(bool disposing)

@@ -1,8 +1,6 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Moq;
-using RpgTkoolSaveEditor.Model.GameDatas;
 using RpgTkoolSaveEditor.Model.SaveDatas;
-using System.Collections.Immutable;
 
 namespace RpgTkoolSaveEditor.Model.Tests;
 
@@ -27,12 +25,12 @@ public class RpgSaveDataRepositoryTests
         // Arrange
         var repository = new RpgSaveDataRepository(loggerMock_.Object);
         var saveData = new SaveData(
-            ImmutableList<Switch>.Empty, 
-            ImmutableList<Variable>.Empty, 
-            0, 
-            ImmutableList<Item>.Empty, 
-            ImmutableList<Weapon>.Empty, 
-            ImmutableList<Armor>.Empty);
+            [],
+            [],
+            0,
+            [],
+            [],
+            []);
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(

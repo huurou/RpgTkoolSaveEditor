@@ -1,6 +1,4 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
 
 namespace RpgTkoolSaveEditor
 {
@@ -10,5 +8,4 @@ namespace RpgTkoolSaveEditor
     public partial class App : Application
     {
     }
-
 }

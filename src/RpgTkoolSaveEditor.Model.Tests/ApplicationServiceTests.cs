@@ -1,8 +1,6 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Moq;
-using RpgTkoolSaveEditor.Model.GameDatas;
 using RpgTkoolSaveEditor.Model.SaveDatas;
-using System.Collections.Immutable;
 
 namespace RpgTkoolSaveEditor.Model.Tests;
 
@@ -48,7 +46,7 @@ public class ApplicationServiceTests
             rpgSaveDataRepositoryMock_.Object,
             rmmzSaveDataRepositoryMock_.Object,
             loggerMock_.Object);
-        
+
         saveFileWatcherMock_
             .Setup(x => x.StartAsync(It.IsAny<string>()))
             .ReturnsAsync(SaveFileType.RmmzSave);
@@ -88,21 +86,21 @@ public class ApplicationServiceTests
             rpgSaveDataRepositoryMock_.Object,
             rmmzSaveDataRepositoryMock_.Object,
             loggerMock_.Object);
-        
+
         var saveData = new SaveData(
-            ImmutableList<Switch>.Empty, 
-            ImmutableList<Variable>.Empty, 
-            1000, 
-            ImmutableList<Item>.Empty, 
-            ImmutableList<Weapon>.Empty, 
-            ImmutableList<Armor>.Empty);
+            [],
+            [],
+            1000,
+            [],
+            [],
+            []);
         service.Initialize("testdata/save");
-        
+
         // StartWatcherAsyncをモック化してRmmzSaveを返すように設定
         saveFileWatcherMock_
             .Setup(x => x.StartAsync(It.IsAny<string>()))
             .ReturnsAsync(SaveFileType.RmmzSave);
-        
+
         await service.StartWatcherAsync();
 
         // Act
@@ -110,7 +108,7 @@ public class ApplicationServiceTests
 
         // Assert
         rmmzSaveDataRepositoryMock_.Verify(
-            x => x.SaveAsync(saveData, "testdata/save"), 
+            x => x.SaveAsync(saveData, "testdata/save"),
             Times.Once);
     }
 
@@ -123,24 +121,24 @@ public class ApplicationServiceTests
             rpgSaveDataRepositoryMock_.Object,
             rmmzSaveDataRepositoryMock_.Object,
             loggerMock_.Object);
-        
+
         var saveData = new SaveData(
-            ImmutableList<Switch>.Empty, 
-            ImmutableList<Variable>.Empty, 
-            1000, 
-            ImmutableList<Item>.Empty, 
-            ImmutableList<Weapon>.Empty, 
-            ImmutableList<Armor>.Empty);
+            [],
+            [],
+            1000,
+            [],
+            [],
+            []);
 
         // Act
         await service.UpdateSaveDataAsync(saveData);
 
         // Assert
         rpgSaveDataRepositoryMock_.Verify(
-            x => x.SaveAsync(It.IsAny<SaveData>(), It.IsAny<string>()), 
+            x => x.SaveAsync(It.IsAny<SaveData>(), It.IsAny<string>()),
             Times.Never);
         rmmzSaveDataRepositoryMock_.Verify(
-            x => x.SaveAsync(It.IsAny<SaveData>(), It.IsAny<string>()), 
+            x => x.SaveAsync(It.IsAny<SaveData>(), It.IsAny<string>()),
             Times.Never);
     }
 }

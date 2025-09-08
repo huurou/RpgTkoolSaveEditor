@@ -1,8 +1,6 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Moq;
-using RpgTkoolSaveEditor.Model.GameDatas;
 using RpgTkoolSaveEditor.Model.SaveDatas;
-using System.Collections.Immutable;
 
 namespace RpgTkoolSaveEditor.Model.Tests;
 
@@ -29,12 +27,12 @@ public class SaveFileWatcherTests : IDisposable
     {
         // Arrange
         var testSaveData = new SaveData(
-            ImmutableList<Switch>.Empty, 
-            ImmutableList<Variable>.Empty, 
-            0, 
-            ImmutableList<Item>.Empty, 
-            ImmutableList<Weapon>.Empty, 
-            ImmutableList<Armor>.Empty);
+            [],
+            [],
+            0,
+            [],
+            [],
+            []);
         rmmzSaveDataRepositoryMock_
             .Setup(x => x.LoadAsync(It.IsAny<string>()))
             .ReturnsAsync(testSaveData);
@@ -45,7 +43,7 @@ public class SaveFileWatcherTests : IDisposable
         // Assert
         Assert.Equal(SaveFileType.RmmzSave, result);
         rmmzSaveDataRepositoryMock_.Verify(
-            x => x.LoadAsync("testdata/save"), 
+            x => x.LoadAsync("testdata/save"),
             Times.Once);
     }
 
@@ -91,6 +89,7 @@ public class SaveFileWatcherTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         watcher_?.Dispose();
     }
 }

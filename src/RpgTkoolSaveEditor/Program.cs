@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using RpgTkoolSaveEditor.Model;
 using RpgTkoolSaveEditor.Model.SaveDatas;
+using System.Windows;
 
 namespace RpgTkoolSaveEditor;
 
@@ -49,6 +50,7 @@ internal static class Program
             {
                 e.Handled = true;
                 logger.LogError("{ex}", e.Exception);
+                MessageBox.Show(e.Exception.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             };
     }
 }
