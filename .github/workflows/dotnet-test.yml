@@ -1,4 +1,4 @@
-name: .NET テスト実行
+name: .NET テスト
 
 on:
   push:
