@@ -18,7 +18,7 @@ internal static class Program
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<ApplicationService>();
-        services.AddSingleton<SaveFileWatcher>();
+        services.AddSingleton<ISaveFileWatcher, SaveFileWatcher>();
         services.AddKeyedSingleton<ISaveDataRepository, RpgSaveDataRepository>("rpgsave");
         services.AddKeyedSingleton<ISaveDataRepository, RmmzSaveDataRepository>("rmmzsave");
 

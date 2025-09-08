@@ -5,7 +5,7 @@ using RpgTkoolSaveEditor.Model.SaveDatas;
 namespace RpgTkoolSaveEditor.Model;
 
 public class ApplicationService(
-    SaveFileWatcher saveFileWatcher,
+    ISaveFileWatcher saveFileWatcher,
     [FromKeyedServices("rpgsave")] ISaveDataRepository rpgSaveDataRepository,
     [FromKeyedServices("rmmzsave")] ISaveDataRepository rmmzSaveDataRepository,
     ILogger<ApplicationService> logger

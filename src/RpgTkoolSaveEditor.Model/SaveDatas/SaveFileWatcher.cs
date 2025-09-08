@@ -7,7 +7,7 @@ public class SaveFileWatcher(
     [FromKeyedServices("rpgsave")] ISaveDataRepository rpgSaveDataRepository,
     [FromKeyedServices("rmmzsave")] ISaveDataRepository rmmzSaveDataRepository,
     ILogger<SaveFileWatcher> logger
-)
+) : ISaveFileWatcher
 {
     private const string RPGSAVE_FILE_NAME = "file1.rpgsave";
     private const string RMMZSAVE_FILE_NAME = "file1.rmmzsave";
@@ -18,18 +18,19 @@ public class SaveFileWatcher(
 
     private FileSystemWatcher? saveDataWather_;
     private CancellationTokenSource? cancellationTokenSource_;
+    private bool disposed_;
 
     public async Task<SaveFileType> StartAsync(string saveDirPath)
     {
+        ThrowIfDisposed();
+
         var saveFileType =
             File.Exists(Path.Combine(saveDirPath, RPGSAVE_FILE_NAME)) ? SaveFileType.RpgSave
             : File.Exists(Path.Combine(saveDirPath, RMMZSAVE_FILE_NAME)) ? SaveFileType.RmmzSave
             : throw new InvalidOperationException($"'{RPGSAVE_FILE_NAME}' または '{RMMZSAVE_FILE_NAME}' が '{saveDirPath}' に見つかりませんでした。");
-        if (saveDataWather_?.EnableRaisingEvents == true)
-        {
-            saveDataWather_.EnableRaisingEvents = false;
-            saveDataWather_.Dispose();
-        }
+        
+        DisposeWatcher();
+        
         saveDataWather_ = saveFileType switch
         {
             SaveFileType.RpgSave => new(saveDirPath, RPGSAVE_FILE_NAME),
@@ -42,11 +43,12 @@ public class SaveFileWatcher(
                 logger.LogInformation("セーブデータに変更あり");
 
                 cancellationTokenSource_?.Cancel();
+                cancellationTokenSource_?.Dispose();
                 cancellationTokenSource_ = new();
                 try
                 {
-                    await Task.Delay(100, cancellationTokenSource_.Token);
-                    await LoadAsync(saveDirPath, saveFileType);
+                    await Task.Delay(100, cancellationTokenSource_.Token).ConfigureAwait(false);
+                    await LoadAsync(saveDirPath, saveFileType).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -55,13 +57,15 @@ public class SaveFileWatcher(
             };
         saveDataWather_.EnableRaisingEvents = true;
 
-        await LoadAsync(saveDirPath, saveFileType);
+        await LoadAsync(saveDirPath, saveFileType).ConfigureAwait(false);
 
         return saveFileType;
     }
 
     private async Task LoadAsync(string saveDirPath, SaveFileType saveFileType)
     {
+        ThrowIfDisposed();
+
         if (LoadSuppressed)
         {
             logger.LogInformation("セーブデータのロードが抑制されました。");
@@ -76,8 +80,46 @@ public class SaveFileWatcher(
             SaveFileType.RmmzSave => rmmzSaveDataRepository,
             _ => throw new NotSupportedException(),
         };
-        var saveData = await saveDataRepository.LoadAsync(saveDirPath);
+        var saveData = await saveDataRepository.LoadAsync(saveDirPath).ConfigureAwait(false);
         SaveDataLoaded?.Invoke(this, new(saveData));
+    }
+
+    private void DisposeWatcher()
+    {
+        if (saveDataWather_ is not null)
+        {
+            saveDataWather_.EnableRaisingEvents = false;
+            saveDataWather_.Dispose();
+            saveDataWather_ = null;
+        }
+    }
+
+    private void ThrowIfDisposed()
+    {
+        if (disposed_)
+        {
+            throw new ObjectDisposedException(nameof(SaveFileWatcher));
+        }
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposed_)
+        {
+            if (disposing)
+            {
+                DisposeWatcher();
+                cancellationTokenSource_?.Dispose();
+                cancellationTokenSource_ = null;
+            }
+            disposed_ = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }
 
