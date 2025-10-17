@@ -58,68 +58,65 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
             using var armorsFileStream = new FileStream(armorsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             if (await JsonNode.ParseAsync(armorsFileStream).ConfigureAwait(false) is not JsonArray armorDataJsonArray) { throw new InvalidOperationException($"{armorsFilePath}のJSON変換に失敗しました。"); }
 
-            var switchDataList = new List<Switch>();
-            for (var i = 1; i < switchValuesJsonArray.Count; i++)
-            {
-                var switchName = switchNamesJsonArray[i] != null ? switchNamesJsonArray[i]!.GetValue<string>() : $"スイッチ{i:0000}";
-                switchDataList.Add(new(i, switchName, switchValuesJsonArray[i]?.GetValue<bool?>()));
-            }
+            var switches = switchNamesJsonArray.Skip(1)
+                .Select((x, i) => (Id: i, Name: x!.GetValue<string>()))
+                .Where(x => !string.IsNullOrEmpty(x.Name))
+                .Select(x => new Switch(x.Id, x.Name, x.Id < switchValuesJsonArray.Count ? switchValuesJsonArray[x.Id]?.GetValue<bool?>() : null));
 
-            var variableDataList = new List<Variable>();
-            for (var i = 1; i < variableValuesJsonArray.Count; i++)
-            {
-                var variableName = variableNamesJsonArray[i] != null ? variableNamesJsonArray[i]!.GetValue<string>() : $"変数{i:0000}";
-                var value = variableValuesJsonArray[i]?.GetValueKind() switch
+            var variableValues = variableValuesJsonArray.Select(
+                x => x?.GetValueKind() switch
                 {
-                    JsonValueKind.Number => variableValuesJsonArray[i]!.GetValue<int>(),
-                    JsonValueKind.String => variableValuesJsonArray[i]!.GetValue<string>(),
-                    _ => variableValuesJsonArray[i]?.GetValue<object>()
-                };
-                variableDataList.Add(new(i, variableName, value));
-            }
+                    JsonValueKind.String => x.GetValue<string>(),
+                    JsonValueKind.Number => x.GetValue<double>(),
+                    JsonValueKind.True or JsonValueKind.False => x.GetValue<bool>(),
+                    JsonValueKind.Null => null,
+                    // いずれにも一致しない場合は元のJsonNodeを返す
+                    _ => (object?)x,
+                }
+            ).ToList();
+            var variables = variableNamesJsonArray
+                .Select((x, i) => (Id: i, Name: x!.GetValue<string>())).Skip(1).Where(x => !string.IsNullOrEmpty(x.Name))
+                .Select(x => new Variable(x.Id, x.Name, x.Id < variableValues.Count ? variableValues[x.Id] : null));
 
-            var heldItemDataList = new List<Item>();
-            foreach (var heldItemKeyValue in heldItemsJsonObject.AsObject())
-            {
-                var itemId = int.Parse(heldItemKeyValue.Key);
-                var itemName = itemDataJsonArray[itemId]?["name"]?.GetValue<string>() ?? $"アイテム{itemId}";
-                var itemDescription = itemDataJsonArray[itemId]?["description"]?.GetValue<string>() ?? "";
-                var itemCount = heldItemKeyValue.Value!.GetValue<int>();
-                heldItemDataList.Add(new(itemId, itemName, itemDescription, itemCount));
-            }
-            heldItemDataList.Sort((x, y) => x.Id.CompareTo(y.Id));
+            var gold = goldJsonValue!.GetValue<int>();
 
-            var heldWeaponDataList = new List<Weapon>();
-            foreach (var heldWeaponKeyValue in heldWeaponsJsonObject.AsObject())
-            {
-                var weaponId = int.Parse(heldWeaponKeyValue.Key);
-                var weaponName = weaponDataJsonArray[weaponId]?["name"]?.GetValue<string>() ?? $"武器{weaponId}";
-                var weaponDescription = weaponDataJsonArray[weaponId]?["description"]?.GetValue<string>() ?? "";
-                var weaponCount = heldWeaponKeyValue.Value!.GetValue<int>();
-                heldWeaponDataList.Add(new(weaponId, weaponName, weaponDescription, weaponCount));
-            }
-            heldWeaponDataList.Sort((x, y) => x.Id.CompareTo(y.Id));
+            var items = itemDataJsonArray.OfType<JsonNode>().Where(x => !string.IsNullOrEmpty(x?["name"]?.GetValue<string>())).Select(
+                x => new Item(
+                    x!["id"]!.GetValue<int>(),
+                    x["name"]!.GetValue<string>(),
+                    x["description"]!.GetValue<string>(),
+                    heldItemsJsonObject.TryGetPropertyValue(x["id"]!.GetValue<int>().ToString(), out var countJsonNode) ? countJsonNode!.GetValue<int>() : 0
+                )
+            );
 
-            var heldArmorDataList = new List<Armor>();
-            foreach (var heldArmorKeyValue in heldArmorsJsonObject.AsObject())
-            {
-                var armorId = int.Parse(heldArmorKeyValue.Key);
-                var armorName = armorDataJsonArray[armorId]?["name"]?.GetValue<string>() ?? $"防具{armorId}";
-                var armorDescription = armorDataJsonArray[armorId]?["description"]?.GetValue<string>() ?? "";
-                var armorCount = heldArmorKeyValue.Value!.GetValue<int>();
-                heldArmorDataList.Add(new(armorId, armorName, armorDescription, armorCount));
-            }
-            heldArmorDataList.Sort((x, y) => x.Id.CompareTo(y.Id));
+            var weapons = weaponDataJsonArray.OfType<JsonNode>().Where(x => !string.IsNullOrEmpty(x?["name"]?.GetValue<string>())).Select(
+                x => new Weapon(
+                    x!["id"]!.GetValue<int>(),
+                    x["name"]!.GetValue<string>(),
+                    x["description"]!.GetValue<string>(),
+                    heldWeaponsJsonObject.TryGetPropertyValue(x["id"]!.GetValue<int>().ToString(), out var countJsonNode) ? countJsonNode!.GetValue<int>() : 0
+                )
+            );
+
+            var armors = armorDataJsonArray.OfType<JsonNode>().Where(x => !string.IsNullOrEmpty(x?["name"]?.GetValue<string>())).Select(
+                x => new Armor(
+                    x!["id"]!.GetValue<int>(),
+                    x["name"]!.GetValue<string>(),
+                    x["description"]!.GetValue<string>(),
+                    heldArmorsJsonObject.TryGetPropertyValue(x["id"]!.GetValue<int>().ToString(), out var countJsonNode) ? countJsonNode!.GetValue<int>() : 0
+                )
+            );
 
             logger.LogInformation("セーブデータがロードされました。");
 
             return new SaveData(
-                [.. switchDataList],
-                [.. variableDataList],
-                goldJsonValue.GetValue<int>(),
-                [.. heldItemDataList],
-                [.. heldWeaponDataList],
-                [.. heldArmorDataList]);
+                [.. switches],
+                [.. variables],
+                gold,
+                [.. items],
+                [.. weapons],
+                [.. armors]
+            );
         }
         catch (FileNotFoundException ex)
         {
