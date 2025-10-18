@@ -90,7 +90,7 @@ public class RmmzSaveDataRepositoryTests
         // Assert
         Assert.All(saveData.Switches, x =>
         {
-            Assert.True(x.Id >= 0);
+            Assert.True(x.Id > 0);
             Assert.NotNull(x.Name);
         });
 

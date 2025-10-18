@@ -58,8 +58,9 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
             using var armorsFileStream = new FileStream(armorsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             if (await JsonNode.ParseAsync(armorsFileStream).ConfigureAwait(false) is not JsonArray armorDataJsonArray) { throw new InvalidOperationException($"{armorsFilePath}のJSON変換に失敗しました。"); }
 
-            var switches = switchNamesJsonArray.Skip(1)
+            var switches = switchNamesJsonArray
                 .Select((x, i) => (Id: i, Name: x!.GetValue<string>()))
+                .Skip(1)
                 .Where(x => !string.IsNullOrEmpty(x.Name))
                 .Select(x => new Switch(x.Id, x.Name, x.Id < switchValuesJsonArray.Count ? switchValuesJsonArray[x.Id]?.GetValue<bool?>() : null));
 
@@ -75,7 +76,9 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
                 }
             ).ToList();
             var variables = variableNamesJsonArray
-                .Select((x, i) => (Id: i, Name: x!.GetValue<string>())).Skip(1).Where(x => !string.IsNullOrEmpty(x.Name))
+                .Select((x, i) => (Id: i, Name: x!.GetValue<string>()))
+                .Skip(1)
+                .Where(x => !string.IsNullOrEmpty(x.Name))
                 .Select(x => new Variable(x.Id, x.Name, x.Id < variableValues.Count ? variableValues[x.Id] : null));
 
             var gold = goldJsonValue!.GetValue<int>();
