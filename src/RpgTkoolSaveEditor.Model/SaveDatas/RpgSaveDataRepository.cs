@@ -167,14 +167,26 @@ public class RpgSaveDataRepository(ILogger<RpgSaveDataRepository> logger) : ISav
             foreach (var item in saveData.Items)
             {
                 heldItemsJsonObject[item.Id.ToString()] = item.Count;
+                if ((int?)heldItemsJsonObject[item.Id.ToString()] == 0)
+                {
+                    heldItemsJsonObject.Remove(item.Id.ToString());
+                }
             }
             foreach (var weapon in saveData.Weapons)
             {
                 heldWeaponsJsonObject[weapon.Id.ToString()] = weapon.Count;
+                if ((int?)heldWeaponsJsonObject[weapon.Id.ToString()] == 0)
+                {
+                    heldWeaponsJsonObject.Remove(weapon.Id.ToString());
+                }
             }
             foreach (var armor in saveData.Armors)
             {
                 heldArmorsJsonObject[armor.Id.ToString()] = armor.Count;
+                if ((int?)heldArmorsJsonObject[armor.Id.ToString()] == 0)
+                {
+                    heldArmorsJsonObject.Remove(armor.Id.ToString());
+                }
             }
             using var jsonMemoryStreamSave = new MemoryStream();
             await JsonSerializer.SerializeAsync(jsonMemoryStreamSave, rootObject).ConfigureAwait(false);
