@@ -33,8 +33,8 @@ public class SaveFileWatcher(
 
         saveDataWather_ = saveFileType switch
         {
-            SaveFileType.RpgSave => new(saveDirPath, RPGSAVE_FILE_NAME),
-            SaveFileType.RmmzSave => new(saveDirPath, RMMZSAVE_FILE_NAME),
+            SaveFileType.RpgSave => new(saveDirPath, RPGSAVE_FILE_NAME) { EnableRaisingEvents = true },
+            SaveFileType.RmmzSave => new(saveDirPath, RMMZSAVE_FILE_NAME) { EnableRaisingEvents = true },
             _ => throw new NotSupportedException(),
         };
         saveDataWather_.Changed +=
@@ -55,7 +55,6 @@ public class SaveFileWatcher(
                     logger.LogInformation("セーブデータのロードがキャンセルされました。");
                 }
             };
-        saveDataWather_.EnableRaisingEvents = true;
 
         await LoadAsync(saveDirPath, saveFileType).ConfigureAwait(false);
 

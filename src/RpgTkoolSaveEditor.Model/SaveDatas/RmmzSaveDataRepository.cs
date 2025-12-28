@@ -61,7 +61,8 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
             var switches = switchNamesJsonArray
                 .Select((x, i) => (Id: i, Name: x!.GetValue<string>()))
                 .Skip(1)
-                .Where(x => !string.IsNullOrEmpty(x.Name))
+                // IsNullOrEmotyだとあえて名前を空文字にしているスイッチが除外されたためnullチェックにする
+                .Where(x => x.Name is not null)
                 .Select(x => new Switch(x.Id, x.Name, x.Id < switchValuesJsonArray.Count ? switchValuesJsonArray[x.Id]?.GetValue<bool?>() : null));
 
             var variableValues = variableValuesJsonArray.Select(
@@ -78,7 +79,8 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
             var variables = variableNamesJsonArray
                 .Select((x, i) => (Id: i, Name: x!.GetValue<string>()))
                 .Skip(1)
-                .Where(x => !string.IsNullOrEmpty(x.Name))
+                // IsNullOrEmotyだとあえて名前を空文字にしている変数が除外されたためnullチェックにする
+                .Where(x => x.Name is not null)
                 .Select(x => new Variable(x.Id, x.Name, x.Id < variableValues.Count ? variableValues[x.Id] : null));
 
             var gold = goldJsonValue!.GetValue<int>();
