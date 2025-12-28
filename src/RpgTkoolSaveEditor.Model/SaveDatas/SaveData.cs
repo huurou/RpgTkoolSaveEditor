@@ -18,5 +18,6 @@ public record SaveData(
     int Gold,
     ImmutableList<Item> Items,
     ImmutableList<Weapon> Weapons,
-    ImmutableList<Armor> Armors
+    ImmutableList<Armor> Armors,
+    ImmutableList<Actor> Actors
 );

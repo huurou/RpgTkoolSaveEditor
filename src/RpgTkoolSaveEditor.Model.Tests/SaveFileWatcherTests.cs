@@ -32,7 +32,9 @@ public class SaveFileWatcherTests : IDisposable
             0,
             [],
             [],
-            []);
+            [],
+            []
+        );
         rmmzSaveDataRepositoryMock_
             .Setup(x => x.LoadAsync(It.IsAny<string>()))
             .ReturnsAsync(testSaveData);

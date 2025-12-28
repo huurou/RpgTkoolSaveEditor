@@ -93,7 +93,9 @@ public class ApplicationServiceTests
             1000,
             [],
             [],
-            []);
+            [],
+            []
+        );
         service.Initialize("testdata/save");
 
         // StartWatcherAsyncをモック化してRmmzSaveを返すように設定
@@ -128,7 +130,9 @@ public class ApplicationServiceTests
             1000,
             [],
             [],
-            []);
+            [],
+            []
+        );
 
         // Act
         await service.UpdateSaveDataAsync(saveData);

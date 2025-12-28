@@ -30,7 +30,9 @@ public class RpgSaveDataRepositoryTests
             0,
             [],
             [],
-            []);
+            [],
+            []
+        );
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(

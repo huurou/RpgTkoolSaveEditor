@@ -363,7 +363,3 @@ MigrationBackup/
 FodyWeavers.xsd
 installer/version.nsh
 installer/RpgTkoolSaveEditor_installer.exe
-
-**/.claude/settings.local.json
-**/.serena/cache/
-**/.serena/memories/

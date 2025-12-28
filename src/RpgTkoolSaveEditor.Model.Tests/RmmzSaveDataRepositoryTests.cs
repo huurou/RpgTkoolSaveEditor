@@ -50,7 +50,9 @@ public class RmmzSaveDataRepositoryTests
             originalSaveData.Gold + 1000,
             originalSaveData.Items,
             originalSaveData.Weapons,
-            originalSaveData.Armors);
+            originalSaveData.Armors,
+            []
+        );
 
         // Act
         await repository.SaveAsync(modifiedSaveData, "testdata/save");
@@ -71,7 +73,9 @@ public class RmmzSaveDataRepositoryTests
             0,
             [],
             [],
-            []);
+            [],
+            []
+        );
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(

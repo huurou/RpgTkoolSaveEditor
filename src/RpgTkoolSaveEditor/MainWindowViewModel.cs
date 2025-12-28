@@ -38,6 +38,9 @@ public partial class MainWindowViewModel(ApplicationService applicationService) 
     [ObservableProperty]
     public partial List<ArmorViewModel> SelectedArmors { get; set; } = [];
 
+    [ObservableProperty]
+    public partial List<ActorViewModel> Actors { get; set; } = [];
+
     [RelayCommand]
     public async Task LoadedAsync()
     {
@@ -46,12 +49,13 @@ public partial class MainWindowViewModel(ApplicationService applicationService) 
         applicationService.SaveDataLoaded +=
             (s, e) =>
             {
+                Gold.Value = e.SaveData.Gold;
                 Switches = [.. e.SaveData.Switches.Select(x => new SwitchViewModel(x))];
                 Variables = [.. e.SaveData.Variables.Select(x => new VariableViewModel(x))];
                 Items = [.. e.SaveData.Items.Select(x => new ItemViewModel(x))];
                 Weapons = [.. e.SaveData.Weapons.Select(x => new WeaponViewModel(x))];
                 Armors = [.. e.SaveData.Armors.Select(x => new ArmorViewModel(x))];
-                Gold.Value = e.SaveData.Gold;
+                Actors = [.. e.SaveData.Actors.Select(x => new ActorViewModel(x))];
             };
 
         WeakReferenceMessenger.Default.Register<SaveDataChangedMessage>(
@@ -63,7 +67,8 @@ public partial class MainWindowViewModel(ApplicationService applicationService) 
                     Gold.Value,
                     [.. Items.Select(x => x.ToModel())],
                     [.. Weapons.Select(x => x.ToModel())],
-                    [.. Armors.Select(x => x.ToModel())]
+                    [.. Armors.Select(x => x.ToModel())],
+                    [.. Actors.Select(x => x.ToModel())]
                 )
             )
         );
@@ -82,20 +87,20 @@ public partial class MainWindowViewModel(ApplicationService applicationService) 
     }
 
     [RelayCommand]
-    public void Set99Weapons()
+    public void Set1Weapons()
     {
         foreach (var weapon in SelectedWeapons)
         {
-            weapon.Count = 99;
+            weapon.Count = 1;
         }
     }
 
     [RelayCommand]
-    public void Set99Armors()
+    public void Set1Armors()
     {
         foreach (var armor in SelectedArmors)
         {
-            armor.Count = 99;
+            armor.Count = 1;
         }
     }
 

@@ -42,6 +42,7 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
             if (rootObject["party"]?["_items"] is not JsonObject heldItemsJsonObject) { throw new InvalidOperationException("party._itemsにオブジェクトが見つかりませんでした。"); }
             if (rootObject["party"]?["_weapons"] is not JsonObject heldWeaponsJsonObject) { throw new InvalidOperationException("party._weaponsにオブジェクトが見つかりませんでした。"); }
             if (rootObject["party"]?["_armors"] is not JsonObject heldArmorsJsonObject) { throw new InvalidOperationException("party._armorsにオブジェクトが見つかりませんでした。"); }
+            if (rootObject["actors"]?["_data"] is not JsonArray actorsJsonArray) { throw new InvalidOperationException("actors._dataに配列が見つかりませんでした。"); }
 
             var systemFilePath = Path.Combine(saveDirPath, "..", "data", "System.json");
             using var systemFileStream = new FileStream(systemFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -112,16 +113,24 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
                 )
             );
 
+            var actors = actorsJsonArray
+                .Select((x, i) => (Id: i, Value: x))
+                .Where(x => !string.IsNullOrEmpty(x.Value?["_name"]?.GetValue<string>()))
+                .Where(x => x.Value is not null)
+                .Select(x => new Actor(
+                    x.Id,
+                    x.Value?["_name"]?.GetValue<string>() ?? "",
+                    x.Value?["_hp"]?.GetValue<int>() ?? default,
+                    x.Value?["_mp"]?.GetValue<int>() ?? default,
+                    x.Value?["_tp"]?.GetValue<int>() ?? default,
+                    x.Value?["_level"]?.GetValue<int>() ?? default,
+                    x.Value?["_exp"]?["1"]?.GetValue<int>() ?? default
+                )
+            );
+
             logger.LogInformation("セーブデータがロードされました。");
 
-            return new SaveData(
-                [.. switches],
-                [.. variables],
-                gold,
-                [.. items],
-                [.. weapons],
-                [.. armors]
-            );
+            return new SaveData([.. switches], [.. variables], gold, [.. items], [.. weapons], [.. armors], [.. actors]);
         }
         catch (FileNotFoundException ex)
         {
@@ -181,6 +190,7 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
             if (rootObject["party"]?["_items"] is not JsonObject heldItemsJsonObject) { throw new InvalidOperationException("party._itemsにオブジェクトが見つかりませんでした。"); }
             if (rootObject["party"]?["_weapons"] is not JsonObject heldWeaponsJsonObject) { throw new InvalidOperationException("party._weaponsにオブジェクトが見つかりませんでした。"); }
             if (rootObject["party"]?["_armors"] is not JsonObject heldArmorsJsonObject) { throw new InvalidOperationException("party._armorsにオブジェクトが見つかりませんでした。"); }
+            if (rootObject["actors"]?["_data"] is not JsonArray actorsJsonArray) { throw new InvalidOperationException("actors._dataに配列が見つかりませんでした。"); }
 
             foreach (var @switch in saveData.Switches)
             {
@@ -191,6 +201,7 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
                 }
                 switchValuesJsonArray[@switch.Id] = @switch.Value;
             }
+
             foreach (var variable in saveData.Variables)
             {
                 // セーブデータの変数配列は要素数が全変数数より少ないことがあるので足りない分だけ増やす
@@ -200,7 +211,9 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
                 }
                 variableValuesJsonArray[variable.Id] = JsonSerializer.SerializeToNode(variable.Value);
             }
+
             goldJsonValue.ReplaceWith(saveData.Gold);
+
             foreach (var item in saveData.Items)
             {
                 heldItemsJsonObject[item.Id.ToString()] = item.Count;
@@ -209,6 +222,7 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
                     heldItemsJsonObject.Remove(item.Id.ToString());
                 }
             }
+
             foreach (var weapon in saveData.Weapons)
             {
                 heldWeaponsJsonObject[weapon.Id.ToString()] = weapon.Count;
@@ -217,6 +231,7 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
                     heldWeaponsJsonObject.Remove(weapon.Id.ToString());
                 }
             }
+
             foreach (var armor in saveData.Armors)
             {
                 heldArmorsJsonObject[armor.Id.ToString()] = armor.Count;
@@ -224,6 +239,19 @@ public class RmmzSaveDataRepository(ILogger<RmmzSaveDataRepository> logger) : IS
                 {
                     heldArmorsJsonObject.Remove(armor.Id.ToString());
                 }
+            }
+
+            foreach (var actor in saveData.Actors)
+            {
+                var actorJsonObject = (actorsJsonArray[actor.Id]?.AsObject())
+                    ?? throw new InvalidOperationException($"指定Id:{actor.Id}のアクターが存在しません。");
+
+                actorJsonObject["_name"] = actor.Name;
+                actorJsonObject["_hp"] = actor.HP;
+                actorJsonObject["_mp"] = actor.MP;
+                actorJsonObject["_tp"] = actor.TP;
+                actorJsonObject["_level"] = actor.Level;
+                actorJsonObject["_exp"]!["1"] = actor.Exp;
             }
 
             using var jsonMemoryStreamSave = new MemoryStream();
